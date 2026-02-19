@@ -1,0 +1,8 @@
+{
+  "track_id": "tokentalos_rebrand_20260219",
+  "type": "refactor",
+  "status": "new",
+  "created_at": "2026-02-19T19:55:00Z",
+  "updated_at": "2026-02-19T19:55:00Z",
+  "description": "Rename the project from Token Wall to Token Talos, including codebase, database, and UI rebranding, and transition to GitHub-based package distribution."
+}

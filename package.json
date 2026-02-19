@@ -1,0 +1,63 @@
+{
+  "name": "@meller/tokentalos",
+  "version": "0.1.0",
+  "description": "Token Talos: The ORM for LLMs. A standalone gateway and library for cost-optimized, secure, and tracked prompt orchestration.",
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./engine": "./lib/engine/index.js"
+  },
+  "bin": {
+    "tokentalos": "bin/tokentalos.js"
+  },
+  "files": [
+    "index.js",
+    "bin/",
+    "lib/",
+    "api/index.js",
+    "api/api/",
+    "api/middleware/",
+    "api/public/",
+    "package.json"
+  ],
+  "scripts": {
+    "setup": "npm install && cd api && npm install && cd ../dashboard && npm install",
+    "build": "cd dashboard && npm run build && mkdir -p ../api/public && cp -r dist/* ../api/public/",
+    "start": "node bin/tokentalos.js",
+    "dev:api": "cd api && npm run dev",
+    "dev:dashboard": "cd dashboard && npm run dev"
+  },
+  "keywords": [
+    "llm",
+    "tokens",
+    "cost-analysis",
+    "prompt-engineering",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.76.0",
+    "@google-cloud/vertexai": "^1.10.0",
+    "@google/generative-ai": "^0.1.3",
+    "axios": "^1.6.0",
+    "chalk": "^5.0.0",
+    "cli-table3": "^0.6.3",
+    "commander": "^11.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.0.0",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^9.0.0",
+    "js-tiktoken": "^1.0.7",
+    "openai": "^6.22.0",
+    "pg": "^8.18.0",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  }
+}
