@@ -1,10 +1,11 @@
 {
   "name": "@meller/tokentalos",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "description": "Token Talos: The ORM for LLMs. A standalone gateway and library for cost-optimized, secure, and tracked prompt orchestration.",
   "type": "module",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "main": "index.js",
   "exports": {
@@ -16,12 +17,12 @@
   },
   "files": [
     "index.js",
-    "bin/",
-    "lib/",
+    "bin/tokentalos.js",
+    "lib/engine/",
     "api/index.js",
+    "api/setup.js",
     "api/api/",
     "api/middleware/",
-    "api/public/",
     "package.json"
   ],
   "scripts": {

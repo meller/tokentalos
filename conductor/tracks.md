@@ -21,5 +21,5 @@
 
 ---
 
-- [ ] **Track: Publish Token Talos to npm**
+- [x] **Track: Publish Token Talos to npm**
   *Link: [./tracks/publish_npm_20260220/](./tracks/publish_npm_20260220/)*

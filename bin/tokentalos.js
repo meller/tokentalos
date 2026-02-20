@@ -19,7 +19,7 @@ const getPidFile = (service) => path.join(process.cwd(), `.tokentalos-${service 
 program
   .name('tokentalos')
   .description('Standalone LLM Token Usage Analyzer and Proxy')
-  .version('0.1.0');
+  .version('1.0.1');
 
 program
   .command('setup')
