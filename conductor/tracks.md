@@ -18,3 +18,8 @@
 
 - [x] **Track: Rename project to Token Talos, refactor all code symbols, and transition to GitHub Package distribution.**
   *Link: [./tracks/tokentalos_rebrand_20260219/](./tracks/tokentalos_rebrand_20260219/)*
+
+---
+
+- [ ] **Track: Publish Token Talos to npm**
+  *Link: [./tracks/publish_npm_20260220/](./tracks/publish_npm_20260220/)*
