@@ -47,10 +47,10 @@ Expose new security and financial data in the Dashboard.
     - [ ] Add a progress bar to the project summary showing current spend vs. monthlyBudget.
 - [ ] Task: Security Alerts Log
     - [ ] Create a section in prompt details to show intercepted security threats.
-- [ ] Task: Prompt Expansion Tabs UI
-    - [ ] Refactor the expanded prompt view in the dashboard to use tabs instead of a long vertical list.
-    - [ ] Create tabs for: "Variables", "Engine Insight", "Model Comparison", and "Reasoning Verification" (OPV).
-- [ ] Task: Model Migration Recommendations (MCE)
-    - [ ] Implement real-time "Alternative Model" cost comparison logic for specific prompts.
-    - [ ] Add model comparison details to the "Model Comparison" tab showing cost differences across engines and the best recommendation.
+- [x] Task: Prompt Expansion Tabs UI
+    - [x] Refactor the expanded prompt view in the dashboard to use tabs instead of a long vertical list.
+    - [x] Create tabs for: "Variables", "Engine Insight", "Model Comparison", and "Reasoning Verification" (OPV).
+- [x] Task: Model Migration Recommendations (MCE)
+    - [x] Implement real-time "Alternative Model" cost comparison logic for specific prompts.
+    - [x] Add model comparison details to the "Model Comparison" tab showing cost differences across engines and the best recommendation.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & UI' (Protocol in workflow.md)
