@@ -765,11 +765,11 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
             <DetailMetric label="Status" value={item.token_limit_exceeded ? 'Warning' : 'Good'} color={item.token_limit_exceeded ? 'text-red-600' : 'text-green-600'} />
           </div>
 
-          <div className="flex gap-2 border-b border-slate-200 pb-0 overflow-x-auto scroller-hide">
-            <button onClick={() => setActiveTab('variables')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'variables' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Variables</button>
-            <button onClick={() => setActiveTab('engine_insight')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'engine_insight' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Engine Insight</button>
-            <button onClick={() => setActiveTab('model_comparison')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'model_comparison' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Model Comparison</button>
-            <button onClick={() => setActiveTab('reasoning_verification')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'reasoning_verification' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Reasoning Verification</button>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <button onClick={() => setActiveTab('variables')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all border ${activeTab === 'variables' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'}`}>Variables</button>
+            <button onClick={() => setActiveTab('engine_insight')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all border ${activeTab === 'engine_insight' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'}`}>Engine Insight</button>
+            <button onClick={() => setActiveTab('model_comparison')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all border ${activeTab === 'model_comparison' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'}`}>Model Comparison</button>
+            <button onClick={() => setActiveTab('reasoning_verification')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all border ${activeTab === 'reasoning_verification' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'}`}>Reasoning Verification</button>
           </div>
 
           {/* Tab Content */}
