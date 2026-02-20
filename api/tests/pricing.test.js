@@ -40,4 +40,17 @@ describe('Pricing Engine (CostCalculator)', () => {
         expect(someAlt.savingsPct).toBeGreaterThan(0);
         expect(someAlt.savingsPct).toBeLessThanOrEqual(100);
     });
+
+    test('provider alias: gemini resolves to google pricing', () => {
+        // 'gemini' is stored in usage_data but the pricing key is 'google'
+        const [inputCost, outputCost] = calculator.calculateCost('gemini', 'gemini-3-flash-preview', 1_000_000, 1_000_000);
+        expect(inputCost).toBe(0.50); // same as google/gemini-3-flash-preview
+        expect(outputCost).toBe(3.00);
+
+        const alts = calculator.getAllAlternatives('gemini', 'gemini-3-flash-preview', 1000, 1000);
+        expect(alts.length).toBeGreaterThan(0);
+        // Every alt that is cheaper should have positive savingsPct
+        const cheaper = alts.filter(a => a.savingsPct > 0);
+        expect(cheaper.length).toBeGreaterThan(0);
+    });
 });
