@@ -1,6 +1,6 @@
 {
   "name": "@meller/tokentalos",
-  "version": "1.0.4",
+  "version": "1.0.8",
   "description": "Token Talos: The ORM for LLMs. A standalone gateway and library for cost-optimized, secure, and tracked prompt orchestration.",
   "type": "module",
   "publishConfig": {
@@ -57,8 +57,10 @@
     "js-tiktoken": "^1.0.7",
     "openai": "^6.22.0",
     "pg": "^8.18.0",
-    "sqlite": "^5.0.1",
-    "sqlite3": "^5.1.6",
     "uuid": "^9.0.1"
+  },
+  "optionalDependencies": {
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
   }
 }
