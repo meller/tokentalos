@@ -53,4 +53,11 @@ Expose new security and financial data in the Dashboard.
 - [x] Task: Model Migration Recommendations (MCE)
     - [x] Implement real-time "Alternative Model" cost comparison logic for specific prompts.
     - [x] Add model comparison details to the "Model Comparison" tab showing cost differences across engines and the best recommendation.
+    - [x] Add `mce_alternatives` column to `explain_plans` DB schema (SQLite + PostgreSQL).
+    - [x] Persist `mce_alternatives` JSON in both the engine execute path and the API execute endpoint.
+    - [x] Add provider alias mapping (`gemini` → `google`, `aws` → `amazon`, etc.) to `pricing.js` so callers using informal provider names get correct cost calculations.
+    - [x] Fix on-the-fly MCE backfill in `/recent` endpoint to use `calculateCost()` from tokens (not stored `total_cost` which is `0` for passively-ingested records) — this unblocks `mce_best_alternative_model` being set and "Save X%" badges appearing.
+    - [x] Fix cost display in prompt card header and Model Comparison "Current" row to derive cost from `mce_alternatives[0].savingsPct` when `total_cost = 0`.
+    - [x] Remove duplicate "Save X%" badge (was appearing in both the title row and subtitle row).
+    - [x] Add Jest unit tests for `CostCalculator`: `calculateCost`, `getBestAlternative`, `getAllAlternatives`, and provider alias resolution.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & UI' (Protocol in workflow.md)
