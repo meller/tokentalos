@@ -728,16 +728,8 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-2">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               <span>{new Date(item.timestamp).toLocaleString()} • <span className="uppercase">{item.provider}</span> {item.model}</span>
-
-              {/* Migration Badge */}
-              {item.explain_plan?.mce_best_alternative_model && (item.explain_plan.mce_savings_pct || 0) > 10 && (
-                <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[9px] font-black uppercase tracking-tighter flex items-center gap-1 border border-blue-200">
-                  <TrendingUp className="h-2 w-2" />
-                  Save {Math.round(item.explain_plan.mce_savings_pct)}%
-                </span>
-              )}
             </p>
           </div>
           <div className="hidden md:flex items-center gap-8 text-right mr-4">
