@@ -38,7 +38,7 @@ export async function runSetup() {
   console.log(chalk.gray('This wizard will configure your Database, Collector (API), and Dashboard.'));
   console.log(chalk.white('\n  [Collector]: ') + chalk.gray('The ingestion endpoint that receives and analyzes LLM data.'));
   console.log(chalk.white('  [Dashboard]: ') + chalk.gray('The visual interface for monitoring your AI performance.\n'));
-  
+
   const answers = await inquirer.prompt([
     // --- DATABASE SECTION ---
     {
@@ -115,11 +115,28 @@ export async function runSetup() {
       when: (ans) => ans.enableCollector,
       validate: (input) => !isNaN(parseInt(input)) || 'Please enter a valid port number',
     },
-    // ... safety and intelligence ...
+
+    // --- DASHBOARD SECTION ---
+    {
+      type: 'confirm',
+      name: 'enableDashboard',
+      message: chalk.magenta('DASHBOARD: ') + 'Enable web interface?',
+      default: true,
+    },
+    {
+      type: 'input',
+      name: 'dashboardPort',
+      message: '  Dashboard Port:',
+      default: 8060,
+      when: (ans) => ans.enableDashboard,
+      validate: (input) => !isNaN(parseInt(input)) || 'Please enter a valid port number',
+    },
+
+    // --- LLM CONFIGURATION (Common) ---
     {
       type: 'list',
       name: 'llmProvider',
-      message: '  LLM provider for OPV/Analysis:',
+      message: chalk.yellow('LLM CONFIG: ') + 'Select provider for OPV/Analysis/Ingest:',
       choices: [
         { name: 'Gemini (via ADC/Vertex)', value: 'gemini' },
         { name: 'Anthropic', value: 'anthropic' },
@@ -127,7 +144,7 @@ export async function runSetup() {
         { name: 'Skip / Configure Later', value: 'none' },
       ],
       default: 'none',
-      when: (ans) => ans.enableCollector,
+      when: (ans) => ans.enableCollector || ans.enableDashboard,
     },
     {
       type: 'input',
@@ -139,26 +156,28 @@ export async function runSetup() {
         if (ans.llmProvider === 'openai') return 'gpt-4o-mini';
         return 'none';
       },
-      when: (ans) => ans.enableCollector && ans.llmProvider !== 'none',
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider !== 'none',
     },
     {
       type: 'input',
       name: 'location',
       message: '  LLM Model Location:',
       default: (ans) => ans.llmProvider === 'gemini' ? 'global' : 'us-central1',
-      when: (ans) => ans.enableCollector && ans.llmProvider !== 'none',
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider !== 'none',
     },
     {
       type: 'input',
       name: 'gcpProjectId',
       message: '  Google Cloud Project ID (required for Vertex AI/ADC):',
-      when: (ans) => ans.enableCollector && ans.llmProvider === 'gemini',
-      validate: (input) => input.length > 0 || 'Project ID is required for Vertex AI',
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider === 'gemini',
+      validate: (input) => input.length > 0 || 'Project ID is required for Vertex AI (or set GOOGLE_CLOUD_PROJECT env)',
     },
+
+    // --- SAFETY FEATURES (Collector Only) ---
     {
       type: 'checkbox',
       name: 'formattingFeatures',
-      message: '  Select Safety features:',
+      message: chalk.green('SAFETY: ') + 'Select active guard features:',
       choices: [
         { name: 'Compress (Lossless compression)', value: 'compress', checked: true },
         { name: 'Neutralize (XML wrapping)', value: 'neutralize', checked: true },
@@ -207,31 +226,17 @@ export async function runSetup() {
       when: (ans) => ans.enableCollector,
     },
 
-    // --- DASHBOARD SECTION ---
-    {
-      type: 'confirm',
-      name: 'enableDashboard',
-      message: chalk.magenta('DASHBOARD: ') + 'Enable web interface?',
-      default: true,
-    },
-    {
-      type: 'input',
-      name: 'dashboardPort',
-      message: '  Dashboard Port:',
-      default: 8060,
-      when: (ans) => ans.enableDashboard,
-      validate: (input) => !isNaN(parseInt(input)) || 'Please enter a valid port number',
-    },
+    // --- ANALYTICS FEATURES (Dashboard Only) ---
     {
       type: 'checkbox',
       name: 'intelligenceFeatures',
-      message: '  Select Analytics features:',
+      message: chalk.magenta('ANALYTICS: ') + 'Select Dashboard features:',
       choices: [
         { name: 'Semantic Caching', value: 'cache', checked: true },
         { name: 'OPV (Reasoning Analysis)', value: 'opv', checked: true },
         { name: 'Explain Plan (Heuristic Detection)', value: 'explain', checked: true },
       ],
-      when: (ans) => ans.enableDashboard && ans.llmProvider !== 'none',
+      when: (ans) => ans.enableDashboard,
     },
     {
       type: 'checkbox',
@@ -242,6 +247,12 @@ export async function runSetup() {
         { name: 'Anthropic', value: 'anthropic', checked: true },
         { name: 'Gemini', value: 'gemini', checked: true },
         { name: 'DeepSeek', value: 'deepseek', checked: true },
+        { name: 'Mistral', value: 'mistral', checked: true },
+        { name: 'Meta', value: 'meta', checked: false },
+        { name: 'Amazon', value: 'amazon', checked: false },
+        { name: 'Alibaba', value: 'alibaba', checked: false },
+        { name: 'xAI', value: 'xai', checked: false },
+        { name: 'Cohere', value: 'cohere', checked: false },
       ],
       when: (ans) => ans.enableDashboard,
     },
@@ -263,9 +274,9 @@ export async function runSetup() {
 
   // Save config
   await fs.writeJson(CONFIG_PATH, answers, { spaces: 2 });
-  
+
   console.log(chalk.green.bold(`\n✅ Setup complete! Configuration saved to ${CONFIG_PATH}`));
-  
+
   if (answers.enableCollector) {
     console.log(chalk.white(`\n  Collector (API) will run on port: `) + chalk.green.bold(answers.gatewayPort));
     console.log(chalk.gray(`  Endpoint: http://localhost:${answers.gatewayPort}/api/v1`));
@@ -275,7 +286,7 @@ export async function runSetup() {
     console.log(chalk.white(`\n  Dashboard will run on port: `) + chalk.magenta.bold(answers.dashboardPort));
     console.log(chalk.gray(`  URL: http://localhost:${answers.dashboardPort}`));
   }
-  
+
   if (answers.llmProvider === 'none') {
     console.log(chalk.yellow(`\nNotice: OPV and AI Analysis are currently disabled.\n`));
   }
