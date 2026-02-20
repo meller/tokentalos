@@ -39,6 +39,14 @@ export async function runSetup() {
   console.log(chalk.white('\n  [Collector]: ') + chalk.gray('The ingestion endpoint that receives and analyzes LLM data.'));
   console.log(chalk.white('  [Dashboard]: ') + chalk.gray('The visual interface for monitoring your AI performance.\n'));
 
+  // Load previous configuration if it exists to use as defaults
+  let previousAnswers = {};
+  if (await fs.pathExists(CONFIG_PATH)) {
+    try {
+      previousAnswers = await fs.readJson(CONFIG_PATH);
+    } catch (e) { /* ignore */ }
+  }
+
   const answers = await inquirer.prompt([
     // --- DATABASE SECTION ---
     {
@@ -166,11 +174,31 @@ export async function runSetup() {
       when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider !== 'none',
     },
     {
+      type: 'list',
+      name: 'geminiAuthType',
+      message: '  Gemini Authentication Method:',
+      choices: [
+        { name: 'Application Default Credentials (ADC)', value: 'adc' },
+        { name: 'API Key', value: 'apikey' }
+      ],
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider === 'gemini',
+      default: (ans) => previousAnswers?.geminiAuthType || 'adc',
+    },
+    {
       type: 'input',
       name: 'gcpProjectId',
-      message: '  Google Cloud Project ID (required for Vertex AI/ADC):',
-      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider === 'gemini',
-      validate: (input) => input.length > 0 || 'Project ID is required for Vertex AI (or set GOOGLE_CLOUD_PROJECT env)',
+      message: '  Google Cloud Project ID (required for ADC):',
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider === 'gemini' && ans.geminiAuthType === 'adc',
+      default: (ans) => previousAnswers?.gcpProjectId || '',
+      validate: (input) => input.length > 0 || 'Project ID is required for Vertex AI',
+    },
+    {
+      type: 'input',
+      name: 'geminiApiKey',
+      message: '  Gemini API Key:',
+      when: (ans) => (ans.enableCollector || ans.enableDashboard) && ans.llmProvider === 'gemini' && ans.geminiAuthType === 'apikey',
+      default: (ans) => previousAnswers?.geminiApiKey || '',
+      validate: (input) => input.length > 0 || 'API Key is required',
     },
 
     // --- SAFETY FEATURES (Collector Only) ---
