@@ -35,3 +35,6 @@ Perform pre-flight checks and publish to npm.
     - [x] Perform a clean install in a temporary directory: `npm install @meller/tokentalos`.
     - [x] Verify the SDK can be imported and the CLI `start collector` command executes successfully.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Publication' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 75cbbf5
