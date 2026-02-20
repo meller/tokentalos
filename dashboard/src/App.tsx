@@ -888,12 +888,25 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        <tr className="bg-blue-50/30">
-                          <td className="px-4 py-3 capitalize font-bold text-slate-800">{item.provider}</td>
-                          <td className="px-4 py-3 font-medium text-slate-800">{item.model} (Current)</td>
-                          <td className="px-4 py-3 text-right font-mono font-bold">${formatCost(item.total_cost || 0)}</td>
-                          <td className="px-4 py-3 text-right text-slate-400">-</td>
-                        </tr>
+                        {(() => {
+                          // Calculate current model cost from tokens (same method as alternatives),
+                          // falling back to stored total_cost only if tokens unavailable
+                          const alts = item.explain_plan.mce_alternatives;
+                          // The alternatives list skips the current model, so we reconstruct its cost from savings pct
+                          // Best alt savings% is relative to current cost: currentCost = bestAlt.cost / (1 - savingsPct/100)
+                          const bestAlt = alts?.[0];
+                          const currentCost = (bestAlt && bestAlt.savingsPct > 0)
+                            ? bestAlt.cost / (1 - bestAlt.savingsPct / 100)
+                            : (item.total_cost || 0);
+                          return (
+                            <tr className="bg-blue-50/30">
+                              <td className="px-4 py-3 capitalize font-bold text-slate-800">{item.provider}</td>
+                              <td className="px-4 py-3 font-medium text-slate-800">{item.model} (Current)</td>
+                              <td className="px-4 py-3 text-right font-mono font-bold">${formatCost(currentCost)}</td>
+                              <td className="px-4 py-3 text-right text-slate-400">-</td>
+                            </tr>
+                          );
+                        })()}
                         {item.explain_plan.mce_alternatives.map((alt: any, i: number) => (
                           <tr key={i} className="hover:bg-slate-50 transition-colors">
                             <td className="px-4 py-3 capitalize text-slate-600 font-medium">{alt.provider}</td>
