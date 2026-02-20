@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { 
-  Zap, 
-  DollarSign, 
-  TrendingUp, 
-  AlertCircle, 
-  List, 
-  LayoutGrid, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  Zap,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
+  List,
+  LayoutGrid,
+  ChevronDown,
+  ChevronUp,
   Info,
   Clock,
   Filter,
@@ -50,6 +50,12 @@ interface ExplainPlan {
   mce_best_alternative_provider?: string;
   mce_best_alternative_cost?: number;
   mce_savings_pct?: number;
+  mce_alternatives?: Array<{
+    model: string;
+    provider: string;
+    cost: number;
+    savingsPct: number;
+  }>;
 }
 
 interface OPVResult {
@@ -110,12 +116,12 @@ function App() {
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null);
   const [explanations, setExplanations] = useState<DetailedExplanation[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
-  
+
   const [activeTab, setActiveTab] = useState<"summary" | "prompts">("summary");
   const [heatmapView, setHeatmapView] = useState<"list" | "chart">("list");
   const [showAllHeatmap, setShowAllHeatmap] = useState(false);
   const [expandedPrompt, setExpandedPrompt] = useState<string | null>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verifyingOPV, setVerifyingOPV] = useState<Set<string>>(new Set());
@@ -170,12 +176,12 @@ function App() {
   const handleVerifyWithOPV = async (item: DetailedExplanation) => {
     try {
       setVerifyingOPV(prev => new Set(prev).add(item.usage_id || item.id));
-      
-      const thinking = item.variables.find(v => v.name === 'thinking' || v.name === 'reasoning')?.content 
-                    || item.variables[0]?.content || "No thinking tokens found.";
+
+      const thinking = item.variables.find(v => v.name === 'thinking' || v.name === 'reasoning')?.content
+        || item.variables[0]?.content || "No thinking tokens found.";
 
       const safety = item.variables.find(v => v.name === 'safety_guardrails')?.content;
-      const taskDescription = safety 
+      const taskDescription = safety
         ? `Verification for endpoint ${item.endpoint}. Safety Guardrails: ${safety}`
         : `Verification for endpoint ${item.endpoint}`;
 
@@ -186,10 +192,10 @@ function App() {
       });
 
       // Update local state with result
-      setExplanations(prev => prev.map(exp => 
-        (exp.usage_id === item.usage_id || exp.id === item.id) 
-        ? { ...exp, opv_result: data } 
-        : exp
+      setExplanations(prev => prev.map(exp =>
+        (exp.usage_id === item.usage_id || exp.id === item.id)
+          ? { ...exp, opv_result: data }
+          : exp
       ));
 
     } catch (err) {
@@ -209,7 +215,7 @@ function App() {
     .filter(exp => {
       if (!showOnlyRecommendations) return true;
       return (
-        exp.explain_plan?.mce_best_alternative_model || 
+        exp.explain_plan?.mce_best_alternative_model ||
         (exp.explain_plan?.detected_issues?.length || 0) > 0 ||
         (exp.explain_plan?.optimization_suggestions?.length || 0) > 0
       );
@@ -243,8 +249,8 @@ function App() {
               </p>
               <div className="flex items-center gap-2 px-2 py-1 bg-blue-50 rounded border border-blue-100 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">
                 <Filter className="h-3 w-3" />
-                <select 
-                  value={selectedProject} 
+                <select
+                  value={selectedProject}
                   onChange={(e) => setSelectedProject(e.target.value)}
                   className="bg-transparent focus:outline-none cursor-pointer"
                 >
@@ -255,13 +261,13 @@ function App() {
             </div>
           </div>
           <div className="flex gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-sm self-start">
-            <button 
+            <button
               onClick={() => setActiveTab("summary")}
               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'summary' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`}
             >
               Summary
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("prompts")}
               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'prompts' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`}
             >
@@ -281,21 +287,21 @@ function App() {
           <>
             {/* Summary Cards */}
             <div className="grid gap-6 md:grid-cols-3 mb-8">
-              <Card 
-                title="Total Tokens" 
-                value={stats?.total_tokens.toLocaleString() || "0"} 
+              <Card
+                title="Total Tokens"
+                value={stats?.total_tokens.toLocaleString() || "0"}
                 subtitle={`across ${stats?.total_requests || 0} requests`}
                 icon={<Zap className="h-5 w-5 text-amber-500" />}
               />
-              <Card 
-                title="Total Cost" 
-                value={`$${formatCost(stats?.total_cost || 0)}`} 
+              <Card
+                title="Total Cost"
+                value={`$${formatCost(stats?.total_cost || 0)}`}
                 subtitle="USD (all time)"
                 icon={<DollarSign className="h-5 w-5 text-green-500" />}
               />
-              <Card 
-                title="Avg Cost/Request" 
-                value={`$${formatCost((stats?.total_cost || 0) / (stats?.total_requests || 1))}`} 
+              <Card
+                title="Avg Cost/Request"
+                value={`$${formatCost((stats?.total_cost || 0) / (stats?.total_requests || 1))}`}
                 subtitle="per API call"
                 icon={<TrendingUp className="h-5 w-5 text-blue-500" />}
               />
@@ -311,13 +317,13 @@ function App() {
                       <p className="text-sm text-slate-500">Variable distribution (Last 30 Days)</p>
                     </div>
                     <div className="flex bg-slate-100 p-1 rounded-md">
-                      <button 
+                      <button
                         onClick={() => setHeatmapView("list")}
                         className={`p-1.5 rounded-sm transition-all ${heatmapView === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
                       >
                         <List className="h-4 w-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => setHeatmapView("chart")}
                         className={`p-1.5 rounded-sm transition-all ${heatmapView === 'chart' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
                       >
@@ -344,9 +350,9 @@ function App() {
                               </div>
                             </div>
                           ))}
-                          
+
                           {heatmap.heatmap.length > 5 && (
-                            <button 
+                            <button
                               onClick={() => setShowAllHeatmap(!showAllHeatmap)}
                               className="w-full py-2 mt-2 text-xs font-bold text-slate-400 hover:text-blue-600 border-t border-slate-50 transition-colors uppercase tracking-widest"
                             >
@@ -360,8 +366,8 @@ function App() {
                             <Treemap
                               data={[{
                                 name: 'Variables',
-                                children: heatmap.heatmap.map(i => ({ 
-                                  name: i.variable_name, 
+                                children: heatmap.heatmap.map(i => ({
+                                  name: i.variable_name,
                                   size: Math.max(i.total_tokens, 50) // Floor for visibility
                                 }))
                               }]}
@@ -396,7 +402,7 @@ function App() {
                           <p className="text-xs opacity-80">You could have saved <strong>${stats.potential_savings.toFixed(4)}</strong> by using recommended alternative models.</p>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => {
                           setShowOnlyRecommendations(true);
                           setActiveTab("prompts");
@@ -413,7 +419,7 @@ function App() {
                       <ShieldCheck className="h-6 w-6 text-blue-600" />
                       Active Guard Performance
                     </h2>
-                    <button 
+                    <button
                       onClick={() => setActiveTab("prompts")}
                       className="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest flex items-center gap-1 group"
                     >
@@ -421,7 +427,7 @@ function App() {
                       <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Caching Card */}
                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm group hover:border-blue-500 transition-all">
@@ -483,7 +489,7 @@ function App() {
                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
                     <Info className="h-5 w-5 text-blue-600 mt-0.5" />
                     <p className="text-sm text-blue-800 leading-relaxed">
-                      TokenTalos Active Guard has saved you a total of <strong>{stats?.total_saved_tokens.toLocaleString()} tokens</strong> (~${stats?.total_saved_cost.toFixed(4)}) 
+                      TokenTalos Active Guard has saved you a total of <strong>{stats?.total_saved_tokens.toLocaleString()} tokens</strong> (~${stats?.total_saved_cost.toFixed(4)})
                       by intercepting redundant requests and optimizing prompt payloads.
                     </p>
                   </div>
@@ -493,7 +499,7 @@ function App() {
               <aside className="space-y-8">
                 <BreakdownTable title="By Provider" items={stats?.by_provider || []} nameKey="provider" color="bg-indigo-500" />
                 <BreakdownTable title="By Model" items={stats?.by_model || []} nameKey="model" color="bg-blue-400" />
-                
+
                 {/* Info Card */}
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                   <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -518,7 +524,7 @@ function App() {
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-md border border-slate-100">
                 <Filter className="h-4 w-4 text-slate-400" />
-                <select 
+                <select
                   value={filterProvider}
                   onChange={(e) => setFilterProvider(e.target.value)}
                   className="bg-transparent text-sm font-medium focus:outline-none"
@@ -530,7 +536,7 @@ function App() {
                 </select>
               </div>
               <div className="flex-1 min-w-[200px]">
-                <input 
+                <input
                   type="text"
                   placeholder="Filter by endpoint..."
                   value={filterEndpoint}
@@ -540,13 +546,13 @@ function App() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
-                <button 
+                <button
                   onClick={() => setSortBy("date")}
                   className={`text-sm px-3 py-1 rounded-md transition-colors ${sortBy === 'date' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
                 >
                   Date
                 </button>
-                <button 
+                <button
                   onClick={() => setSortBy("tokens")}
                   className={`text-sm px-3 py-1 rounded-md transition-colors ${sortBy === 'tokens' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
                 >
@@ -554,7 +560,7 @@ function App() {
                 </button>
               </div>
               <div className="flex items-center gap-2 ml-auto">
-                <button 
+                <button
                   onClick={() => setShowOnlyRecommendations(!showOnlyRecommendations)}
                   className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2 ${showOnlyRecommendations ? 'bg-amber-50 border-amber-200 text-amber-700 shadow-sm' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
                 >
@@ -571,9 +577,9 @@ function App() {
                   {filteredExplanations
                     .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                     .map((exp) => (
-                      <PromptItem 
-                        key={exp.usage_id || exp.id} 
-                        item={exp} 
+                      <PromptItem
+                        key={exp.usage_id || exp.id}
+                        item={exp}
                         isExpanded={expandedPrompt === (exp.usage_id || exp.id)}
                         onToggle={() => setExpandedPrompt(expandedPrompt === (exp.usage_id || exp.id) ? null : (exp.usage_id || exp.id))}
                         formatCost={formatCost}
@@ -586,25 +592,25 @@ function App() {
                   {/* Pagination Controls */}
                   {filteredExplanations.length > itemsPerPage && (
                     <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-slate-200">
-                      <button 
+                      <button
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
                         className="px-3 py-1 text-sm font-bold text-slate-600 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-slate-600"
                       >
                         Prev
                       </button>
-                      
+
                       {Array.from({ length: Math.ceil(filteredExplanations.length / itemsPerPage) }, (_, i) => i + 1)
                         .filter(page => {
                           // Show first, last, and pages around current
-                          return page === 1 || 
-                                 page === Math.ceil(filteredExplanations.length / itemsPerPage) || 
-                                 Math.abs(page - currentPage) <= 2;
+                          return page === 1 ||
+                            page === Math.ceil(filteredExplanations.length / itemsPerPage) ||
+                            Math.abs(page - currentPage) <= 2;
                         })
                         .map((page, idx, arr) => (
                           <div key={page} className="flex items-center">
-                            {idx > 0 && arr[idx-1] !== page - 1 && <span className="px-2 text-slate-300">...</span>}
-                            <button 
+                            {idx > 0 && arr[idx - 1] !== page - 1 && <span className="px-2 text-slate-300">...</span>}
+                            <button
                               onClick={() => setCurrentPage(page)}
                               className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === page ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
                             >
@@ -614,7 +620,7 @@ function App() {
                         ))
                       }
 
-                      <button 
+                      <button
                         onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredExplanations.length / itemsPerPage), p + 1))}
                         disabled={currentPage === Math.ceil(filteredExplanations.length / itemsPerPage)}
                         className="px-3 py-1 text-sm font-bold text-slate-600 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-slate-600"
@@ -681,9 +687,15 @@ function BreakdownTable({ title, items, nameKey, color }: any) {
 }
 
 function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerifying }: any) {
+  const [activeTab, setActiveTab] = useState('variables');
+
+  useEffect(() => {
+    if (!isExpanded) setActiveTab('variables');
+  }, [isExpanded]);
+
   return (
     <div className={`bg-white rounded-xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'ring-2 ring-blue-500 border-blue-500 shadow-lg' : 'border-slate-200 hover:border-slate-300 shadow-sm'}`}>
-      <div 
+      <div
         className="p-4 flex items-center justify-between cursor-pointer select-none"
         onClick={onToggle}
       >
@@ -698,10 +710,9 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
                 <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-tighter">Limit Exceeded</span>
               )}
               {item.opv_result && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                  item.opv_result.status === 'on_track' ? 'bg-green-100 text-green-700' : 
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${item.opv_result.status === 'on_track' ? 'bg-green-100 text-green-700' :
                   item.opv_result.status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
-                }`}>
+                  }`}>
                   OPV: {item.opv_result.status}
                 </span>
               )}
@@ -719,7 +730,7 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
             </div>
             <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-2">
               <span>{new Date(item.timestamp).toLocaleString()} • <span className="uppercase">{item.provider}</span> {item.model}</span>
-              
+
               {/* Migration Badge */}
               {item.explain_plan?.mce_best_alternative_model && (item.explain_plan.mce_savings_pct || 0) > 10 && (
                 <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[9px] font-black uppercase tracking-tighter flex items-center gap-1 border border-blue-200">
@@ -744,151 +755,222 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
       </div>
 
       {isExpanded && (
-        <div className="p-6 bg-slate-50/50 border-t border-slate-100 space-y-8 animate-in slide-in-from-top-2 duration-300">
-          {/* Detailed Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-6 bg-slate-50/50 border-t border-slate-100 space-y-6 animate-in slide-in-from-top-2 duration-300">
+
+          {/* Detailed Stats Header (Always visible) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
             <DetailMetric label="Input Tokens" value={item.input_tokens || item.total_tokens} />
             <DetailMetric label="Output Tokens" value={item.output_tokens || 0} />
             <DetailMetric label="Latency" value={item.latency_ms ? `${item.latency_ms}ms` : 'N/A'} />
             <DetailMetric label="Status" value={item.token_limit_exceeded ? 'Warning' : 'Good'} color={item.token_limit_exceeded ? 'text-red-600' : 'text-green-600'} />
           </div>
 
-          {/* Explain Plan (Issues & Suggestions) */}
-          {(item.explain_plan?.detected_issues?.length > 0 || item.explain_plan?.optimization_suggestions?.length > 0) && (
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engine Insights</h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                {item.explain_plan.detected_issues.map((issue: string, idx: number) => (
-                  <div key={idx} className="bg-red-50 p-3 rounded-lg border border-red-100 flex gap-3 text-red-800">
-                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p className="text-sm font-medium leading-relaxed">{issue}</p>
-                  </div>
-                ))}
-                {item.explain_plan.optimization_suggestions.map((suggestion: string, idx: number) => (
-                  <div key={idx} className="bg-amber-50 p-3 rounded-lg border border-amber-100 flex gap-3 text-amber-800">
-                    <TrendingUp className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p className="text-sm font-medium leading-relaxed">{suggestion}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="flex gap-2 border-b border-slate-200 pb-0 overflow-x-auto scroller-hide">
+            <button onClick={() => setActiveTab('variables')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'variables' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Variables</button>
+            <button onClick={() => setActiveTab('engine_insight')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'engine_insight' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Engine Insight</button>
+            <button onClick={() => setActiveTab('model_comparison')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'model_comparison' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Model Comparison</button>
+            <button onClick={() => setActiveTab('reasoning_verification')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'reasoning_verification' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>Reasoning Verification</button>
+          </div>
 
-          {/* Variable Breakdown */}
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Variable Attribution & Recommendations</h4>
-            <div className="grid gap-3">
-              {item.variables?.map((v: any, idx: number) => {
-                const analysis = item.explain_plan?.variable_analysis?.find((a: any) => a.variable_name === v.name);
-                return (
-                  <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:border-blue-200 transition-colors">
-                    <div className="p-3 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-1.5 h-6 rounded-full ${analysis?.waste_reason ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                        <span className="font-bold text-slate-700 capitalize text-sm">{v.name}</span>
-                        {analysis?.percentage && (
-                          <span className="text-[10px] font-bold text-slate-400">({analysis.percentage.toFixed(0)}%)</span>
+          {/* Tab Content */}
+          <div className="min-h-[200px]">
+            {activeTab === 'variables' && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                <div className="grid gap-3">
+                  {item.variables?.map((v: any, idx: number) => {
+                    const analysis = item.explain_plan?.variable_analysis?.find((a: any) => a.variable_name === v.name);
+                    return (
+                      <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:border-blue-200 transition-colors">
+                        <div className="p-3 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-1.5 h-6 rounded-full ${analysis?.waste_reason ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                            <span className="font-bold text-slate-700 capitalize text-sm">{v.name}</span>
+                            {analysis?.percentage && (
+                              <span className="text-[10px] font-bold text-slate-400">({analysis.percentage.toFixed(0)}%)</span>
+                            )}
+                            {v.original_content && v.content && v.original_content.length > v.content.length && (
+                              <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-600 text-[9px] font-black uppercase border border-green-100">
+                                -{Math.round((1 - v.content.length / v.original_content.length) * 100)}% Smallest
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="font-mono text-xs font-bold text-slate-900">{v.token_count?.toLocaleString()}</span>
+                            <span className="text-[10px] text-slate-400 font-bold ml-2">TOKENS</span>
+                          </div>
+                        </div>
+
+                        {analysis?.waste_reason && (
+                          <div className="px-3 py-2 bg-amber-50 border-b border-amber-100 flex items-start gap-2">
+                            <AlertCircle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
+                            <div>
+                              <p className="text-[11px] font-bold text-amber-800">{analysis.waste_reason}</p>
+                              <p className="text-[10px] text-amber-700 mt-0.5 uppercase font-black tracking-tighter">Action: {analysis.recommendation}</p>
+                            </div>
+                          </div>
                         )}
-                        {v.original_content && v.content && v.original_content.length > v.content.length && (
-                          <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-600 text-[9px] font-black uppercase border border-green-100">
-                            -{Math.round((1 - v.content.length / v.original_content.length) * 100)}% Smallest
-                          </span>
+
+                        {v.content && (
+                          <div className="p-3 bg-white">
+                            <details className="group">
+                              <summary className="list-none flex items-center gap-2 cursor-pointer text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">
+                                <ChevronDown className="h-3 w-3 group-open:rotate-180 transition-transform" />
+                                {v.name} Content
+                              </summary>
+                              <div className="mt-3">
+                                <pre className="text-[11px] font-mono text-slate-600 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 shadow-inner max-h-96 overflow-y-auto">
+                                  {v.content}
+                                </pre>
+                              </div>
+                            </details>
+                          </div>
                         )}
                       </div>
-                      <div className="text-right">
-                        <span className="font-mono text-xs font-bold text-slate-900">{v.token_count?.toLocaleString()}</span>
-                        <span className="text-[10px] text-slate-400 font-bold ml-2">TOKENS</span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'engine_insight' && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                {(item.explain_plan?.detected_issues?.length > 0 || item.explain_plan?.optimization_suggestions?.length > 0) ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {item.explain_plan.detected_issues?.map((issue: string, idx: number) => (
+                      <div key={idx} className="bg-red-50 p-4 rounded-lg border border-red-100 flex gap-3 text-red-800 shadow-sm">
+                        <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
+                        <p className="text-sm font-medium leading-relaxed">{issue}</p>
+                      </div>
+                    ))}
+                    {item.explain_plan.optimization_suggestions?.map((suggestion: string, idx: number) => (
+                      <div key={idx} className="bg-amber-50 p-4 rounded-lg border border-amber-100 flex gap-3 text-amber-800 shadow-sm">
+                        <TrendingUp className="h-5 w-5 mt-0.5 shrink-0" />
+                        <p className="text-sm font-medium leading-relaxed">{suggestion}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 bg-white rounded-xl border border-slate-200">
+                    <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <p className="text-slate-500 font-medium">No pressing issues found for this request.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'model_comparison' && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                {item.explain_plan?.mce_best_alternative_model && (
+                  <div className="bg-blue-600 rounded-xl p-6 text-white flex items-start gap-4 shadow-xl shadow-blue-100 relative overflow-hidden mb-6">
+                    <TrendingUp className="absolute bottom-0 right-0 h-24 w-24 -mb-8 -mr-8 opacity-10 rotate-12" />
+                    <Zap className="h-8 w-8 text-yellow-300 relative z-10 shrink-0" />
+                    <div className="relative z-10">
+                      <p className="text-xs font-black uppercase tracking-widest opacity-80">Migration Opportunity Identified</p>
+                      <p className="text-lg mt-1 leading-relaxed font-bold">
+                        Switch to <span className="underline underline-offset-4 text-yellow-200">{item.explain_plan.mce_best_alternative_model}</span>
+                      </p>
+                      <p className="text-sm text-blue-100 mt-1 opacity-90">
+                        Current model is {item.model}. Switch to reduce costs by <strong className="text-white text-base">{item.explain_plan.mce_savings_pct?.toFixed(0)}%</strong> while maintaining reasoning logic.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {item.explain_plan?.mce_alternatives && item.explain_plan.mce_alternatives.length > 0 ? (
+                  <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3">Provider</th>
+                          <th className="px-4 py-3">Model</th>
+                          <th className="px-4 py-3 text-right">Cost Estimate</th>
+                          <th className="px-4 py-3 text-right">Savings</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        <tr className="bg-blue-50/30">
+                          <td className="px-4 py-3 capitalize font-bold text-slate-800">{item.provider}</td>
+                          <td className="px-4 py-3 font-medium text-slate-800">{item.model} (Current)</td>
+                          <td className="px-4 py-3 text-right font-mono font-bold">${formatCost(item.total_cost || 0)}</td>
+                          <td className="px-4 py-3 text-right text-slate-400">-</td>
+                        </tr>
+                        {item.explain_plan.mce_alternatives.map((alt: any, i: number) => (
+                          <tr key={i} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-3 capitalize text-slate-600 font-medium">{alt.provider}</td>
+                            <td className="px-4 py-3 text-slate-700">{alt.model}</td>
+                            <td className="px-4 py-3 text-right font-mono text-slate-700">${formatCost(alt.cost)}</td>
+                            <td className="px-4 py-3 text-right">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${alt.savingsPct > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {alt.savingsPct > 0 ? '+' : ''}{alt.savingsPct.toFixed(0)}%
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-10 bg-white rounded-xl border border-slate-200">
+                    <p className="text-slate-500 font-medium">No alternative models configured or tracked.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reasoning_verification' && (
+              <div className="animate-in fade-in duration-300">
+                <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-inner">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <ShieldCheck className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-lg">Reasoning Verification (OPV)</h4>
+                        <p className="text-slate-500 text-sm mt-1">Cross-examine the reasoning generation with an observer model.</p>
                       </div>
                     </div>
-                    
-                    {analysis?.waste_reason && (
-                      <div className="px-3 py-2 bg-amber-50 border-b border-amber-100 flex items-start gap-2">
-                        <AlertCircle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
-                        <div>
-                          <p className="text-[11px] font-bold text-amber-800">{analysis.waste_reason}</p>
-                          <p className="text-[10px] text-amber-700 mt-0.5 uppercase font-black tracking-tighter">Action: {analysis.recommendation}</p>
+                    {!item.opv_result && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onVerify(); }}
+                        disabled={isVerifying}
+                        className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 shadow-sm focus:ring-4 focus:ring-blue-500/20"
+                      >
+                        {isVerifying ? <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> : <ShieldCheck className="h-4 w-4" />}
+                        Verify Now
+                      </button>
+                    )}
+                  </div>
+
+                  {item.opv_result ? (
+                    <div className="space-y-6">
+                      <div className="flex flex-wrap items-center gap-4 border-b border-slate-100 pb-4">
+                        <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${item.opv_result.status === 'on_track' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                          {item.opv_result.status === 'on_track' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                          {item.opv_result.status}
+                        </div>
+                        <div className="text-sm font-bold text-slate-500">
+                          Confidence Scope: <span className="text-slate-900">{(item.opv_result.confidence * 100).toFixed(0)}%</span>
                         </div>
                       </div>
-                    )}
-
-                    {v.content && (
-                      <div className="p-3 bg-white">
-                        <details className="group">
-                          <summary className="list-none flex items-center gap-2 cursor-pointer text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">
-                            <ChevronDown className="h-3 w-3 group-open:rotate-180 transition-transform" />
-                            {v.name} Content
-                          </summary>
-                          <div className="mt-3">
-                            <pre className="text-[11px] font-mono text-slate-600 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 shadow-inner max-h-96 overflow-y-auto">
-                              {v.content}
-                            </pre>
-                          </div>
-                        </details>
+                      <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 relative">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-slate-300 rounded-l-xl"></div>
+                        <p className="text-slate-700 italic leading-relaxed text-[15px]">
+                          "{item.opv_result.reasoning}"
+                        </p>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* OPV Section */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-inner">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <Search className="h-5 w-5 text-blue-600" />
-                <h4 className="font-bold text-slate-900">Reasoning Verification (OPV)</h4>
-              </div>
-              {!item.opv_result && (
-                <button 
-                  onClick={(e) => { e.stopPropagation(); onVerify(); }}
-                  disabled={isVerifying}
-                  className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                >
-                  {isVerifying ? <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" /> : <ShieldCheck className="h-3 w-3" />}
-                  Verify Now
-                </button>
-              )}
-            </div>
-            
-            {item.opv_result ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                    item.opv_result.status === 'on_track' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {item.opv_result.status === 'on_track' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                    {item.opv_result.status}
-                  </div>
-                  <div className="text-xs font-bold text-slate-400">
-                    Confidence: {(item.opv_result.confidence * 100).toFixed(0)}%
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                      <ShieldCheck className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-500 font-medium">Verify this LLM response to detect hallucinations or reasoning loops.</p>
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-slate-600 italic bg-slate-50 p-4 rounded-lg border-l-4 border-slate-200">
-                  "{item.opv_result.reasoning}"
-                </p>
               </div>
-            ) : (
-              <p className="text-sm text-slate-400 italic">No verification performed for this prompt yet.</p>
             )}
           </div>
-
-          {/* Model Migration Insight (MCE) */}
-          {item.explain_plan?.mce_best_alternative_model && (
-            <div className="bg-blue-600 rounded-xl p-6 text-white flex items-start gap-4 shadow-xl shadow-blue-100 relative overflow-hidden">
-              <TrendingUp className="absolute bottom-0 right-0 h-24 w-24 -mb-8 -mr-8 opacity-10 rotate-12" />
-              <Zap className="h-8 w-8 text-yellow-300 relative z-10" />
-              <div className="relative z-10">
-                <p className="text-xs font-black uppercase tracking-widest opacity-80">Migration Opportunity Identified</p>
-                <p className="text-lg mt-1 leading-relaxed font-bold">
-                  Switch to <span className="underline underline-offset-4 text-yellow-200">{item.explain_plan.mce_best_alternative_model}</span>
-                </p>
-                <p className="text-sm text-blue-100 mt-1 opacity-90">
-                  Current model is {item.model}. Switch to reduce costs by <strong className="text-white text-base">{item.explain_plan.mce_savings_pct?.toFixed(0)}%</strong> while maintaining reasoning logic.
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
