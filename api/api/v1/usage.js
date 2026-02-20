@@ -30,12 +30,12 @@ router.post('/ingest', authMiddleware, async (req, res) => {
   const totalTokens = (data.input_tokens || 0) + (data.output_tokens || 0);
   const calculator = getCostCalculator();
   const [inputCost, outputCost] = calculator.calculateCost(
-    provider, 
-    model, 
-    data.input_tokens || 0, 
+    provider,
+    model,
+    data.input_tokens || 0,
     data.output_tokens || 0
   );
-  
+
   const totalCost = inputCost + outputCost;
   const limitExceeded = totalTokens > (config.maxTokens || 32000);
 
@@ -46,7 +46,7 @@ router.post('/ingest', authMiddleware, async (req, res) => {
         input_cost, output_cost, total_cost, endpoint, latency_ms, token_limit_exceeded, timestamp
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      usageId, orgId, projectId, 'ingested', provider, model, data.full_prompt || null, data.response_content || null, 
+      usageId, orgId, projectId, 'ingested', provider, model, data.full_prompt || null, data.response_content || null,
       data.input_tokens || 0, data.output_tokens || 0,
       totalTokens, inputCost, outputCost, totalCost, data.endpoint, data.latency_ms,
       limitExceeded ? 1 : 0, data.timestamp || new Date().toISOString()
@@ -58,12 +58,12 @@ router.post('/ingest', authMiddleware, async (req, res) => {
           INSERT INTO prompt_variables (usage_id, name, content, original_content, token_count, char_count, position)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `, [
-          usageId, 
-          v.name, 
-          v.content || '', 
+          usageId,
+          v.name,
+          v.content || '',
           v.original_content || v.content || '',
-          v.token_count || 0, 
-          v.char_count || 0, 
+          v.token_count || 0,
+          v.char_count || 0,
           v.position || 0
         ]);
 
@@ -87,10 +87,10 @@ router.post('/ingest', authMiddleware, async (req, res) => {
           INSERT INTO variable_actions (usage_id, variable_name, action_type, action_method, details)
           VALUES (?, ?, ?, ?, ?)
         `, [
-          usageId, 
-          action.target, 
-          action.type, 
-          action.method || null, 
+          usageId,
+          action.target,
+          action.type,
+          action.method || null,
           JSON.stringify(action)
         ]);
       }
@@ -113,12 +113,12 @@ router.get('/recent', authMiddleware, async (req, res) => {
   try {
     let sql = 'SELECT * FROM usage_data WHERE org_id = ?';
     let params = [orgId];
-    
+
     if (projectId) {
       sql += ' AND project_id = ?';
       params.push(projectId);
     }
-    
+
     sql += ' ORDER BY timestamp DESC LIMIT ?';
     params.push(parseInt(limit));
 
@@ -130,7 +130,7 @@ router.get('/recent', authMiddleware, async (req, res) => {
         FROM prompt_variables 
         WHERE usage_id = ?
       `, [record.id]);
-      
+
       record.explain_plan = await db.get(`
         SELECT * FROM explain_plans WHERE usage_id = ?
       `, [record.id]);
@@ -139,11 +139,18 @@ router.get('/recent', authMiddleware, async (req, res) => {
         if (record.explain_plan.variable_analysis) record.explain_plan.variable_analysis = JSON.parse(record.explain_plan.variable_analysis);
         if (record.explain_plan.detected_issues) record.explain_plan.detected_issues = JSON.parse(record.explain_plan.detected_issues);
         if (record.explain_plan.optimization_suggestions) record.explain_plan.optimization_suggestions = JSON.parse(record.explain_plan.optimization_suggestions);
-        
+        if (record.explain_plan.mce_alternatives && typeof record.explain_plan.mce_alternatives === 'string') {
+          record.explain_plan.mce_alternatives = JSON.parse(record.explain_plan.mce_alternatives);
+        }
+
         // On-the-fly MCE calculation if missing from DB (for existing records)
-        if (!record.explain_plan.mce_best_alternative_model) {
+        if (!record.explain_plan.mce_best_alternative_model || !record.explain_plan.mce_alternatives) {
           const calculator = getCostCalculator();
           const bestAlt = calculator.getBestAlternative(record.provider, record.model, record.input_tokens, record.output_tokens);
+          const allAlts = calculator.getAllAlternatives(record.provider, record.model, record.input_tokens, record.output_tokens);
+
+          record.explain_plan.mce_alternatives = allAlts;
+
           if (bestAlt) {
             const savingsPct = record.total_cost > 0 ? ((record.total_cost - bestAlt.cost) / record.total_cost) * 100 : 0;
             if (savingsPct > 10) {
@@ -169,7 +176,7 @@ router.post('/execute', authMiddleware, async (req, res) => {
   try {
     const engine = new TokenTalosEngine(config);
     await engine.init();
-    
+
     const result = await engine.execute({
       ...req.body,
       orgId: req.orgId,
@@ -188,14 +195,14 @@ router.post('/execute', authMiddleware, async (req, res) => {
 router.post('/prompt/construct', authMiddleware, async (req, res) => {
   const { provider, model, parts, endpoint, projectId } = req.body;
   const orgId = req.orgId;
-  
+
   const { processedParts, metadata } = await processPromptParts(parts, config);
 
   const finalProvider = provider || config.llmProvider || 'gemini';
   const finalModel = model || config.defaultModel || 'gemini-3-flash-preview';
 
   const prompt = new TokenTalosPrompt(finalProvider, finalModel);
-  
+
   for (const key in processedParts) {
     if (key === 'system') prompt.addSystem(processedParts[key], parts[key]);
     else if (key === 'context') prompt.addContext(processedParts[key], parts[key]);
@@ -206,7 +213,7 @@ router.post('/prompt/construct', authMiddleware, async (req, res) => {
 
   const messages = prompt.toMessages();
   const trackingData = prompt.getTrackingData();
-  
+
   const maxTokens = config.maxTokens || 32000;
   const thresholdAction = config.thresholdAction || 'warning';
 
@@ -248,10 +255,10 @@ router.post('/prompt/construct', authMiddleware, async (req, res) => {
         INSERT INTO variable_actions (usage_id, variable_name, action_type, action_method, details)
         VALUES (?, ?, ?, ?, ?)
       `, [
-        trackingData.id, 
-        action.target, 
-        action.type, 
-        action.method || null, 
+        trackingData.id,
+        action.target,
+        action.type,
+        action.method || null,
         JSON.stringify(action)
       ]);
 
@@ -267,8 +274,8 @@ router.post('/prompt/construct', authMiddleware, async (req, res) => {
     }
 
     // 3. Heuristic Analysis
-    const analysis = runHeuristicAnalysis({ 
-      total_tokens: trackingData.total_tokens, 
+    const analysis = runHeuristicAnalysis({
+      total_tokens: trackingData.total_tokens,
       total_cost: inputCost,
       provider: finalProvider,
       model: finalModel
@@ -280,20 +287,21 @@ router.post('/prompt/construct', authMiddleware, async (req, res) => {
         INSERT INTO explain_plans (
           id, usage_id, variable_analysis, detected_issues, optimization_suggestions, 
           estimated_savings_pct, estimated_savings_usd,
-          mce_best_alternative_model, mce_best_alternative_provider, mce_best_alternative_cost, mce_savings_pct
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          mce_best_alternative_model, mce_best_alternative_provider, mce_best_alternative_cost, mce_savings_pct, mce_alternatives
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
-        planId, 
-        trackingData.id, 
-        JSON.stringify(analysis.variable_analysis), 
-        JSON.stringify(analysis.detected_issues), 
+        planId,
+        trackingData.id,
+        JSON.stringify(analysis.variable_analysis),
+        JSON.stringify(analysis.detected_issues),
         JSON.stringify(analysis.optimization_suggestions),
-        analysis.estimated_savings_pct, 
+        analysis.estimated_savings_pct,
         analysis.estimated_savings_usd,
         analysis.mce_best_alternative_model || null,
         analysis.mce_best_alternative_provider || null,
         analysis.mce_best_alternative_cost || 0,
-        analysis.mce_savings_pct || 0
+        analysis.mce_savings_pct || 0,
+        analysis.mce_alternatives ? JSON.stringify(analysis.mce_alternatives) : null
       ]);
     }
 
