@@ -152,7 +152,10 @@ router.get('/recent', authMiddleware, async (req, res) => {
           record.explain_plan.mce_alternatives = allAlts;
 
           if (bestAlt) {
-            const savingsPct = record.total_cost > 0 ? ((record.total_cost - bestAlt.cost) / record.total_cost) * 100 : 0;
+            // Use calculated cost from tokens (record.total_cost may be 0 for passively ingested records)
+            const [calcInput, calcOutput] = calculator.calculateCost(record.provider, record.model, record.input_tokens, record.output_tokens);
+            const currentCost = (calcInput + calcOutput) > 0 ? (calcInput + calcOutput) : (record.total_cost || 0);
+            const savingsPct = currentCost > 0 ? ((currentCost - bestAlt.cost) / currentCost) * 100 : 0;
             if (savingsPct > 10) {
               record.explain_plan.mce_best_alternative_model = bestAlt.model;
               record.explain_plan.mce_best_alternative_provider = bestAlt.provider;

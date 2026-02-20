@@ -747,7 +747,16 @@ function PromptItem({ item, isExpanded, onToggle, formatCost, onVerify, isVerify
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cost</p>
-              <p className="font-mono font-bold text-blue-600">${formatCost(item.total_cost || 0)}</p>
+              {(() => {
+                // Derive current cost from mce_alternatives when total_cost is 0 (passively ingested records)
+                const bestAlt = item.explain_plan?.mce_alternatives?.[0];
+                const derivedCost = (item.total_cost && item.total_cost > 0)
+                  ? item.total_cost
+                  : (bestAlt && bestAlt.savingsPct > 0)
+                    ? bestAlt.cost / (1 - bestAlt.savingsPct / 100)
+                    : 0;
+                return <p className="font-mono font-bold text-blue-600">${formatCost(derivedCost)}</p>;
+              })()}
             </div>
           </div>
         </div>
