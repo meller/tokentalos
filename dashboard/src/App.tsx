@@ -223,7 +223,7 @@ function App() {
   if (loading && !stats) return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-50">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-      <p className="text-slate-600 font-medium">Loading TokenTalos Analytics...</p>
+      <p className="text-slate-600 font-medium">Loading Token Talos Analytics...</p>
     </div>
   );
 
@@ -235,7 +235,7 @@ function App() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
               <Zap className="h-8 w-8 text-blue-600 fill-blue-600" />
-              TokenTalos Analytics
+              Token Talos Analytics
             </h1>
             <div className="mt-2 flex items-center gap-3">
               <p className="text-slate-600">

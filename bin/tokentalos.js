@@ -30,7 +30,7 @@ program
 
 program
   .command('start [service]')
-  .description('Start TokenTalos services (all, collector, or dashboard)')
+  .description('Start Token Talos services (all, collector, or dashboard)')
   .option('-d, --daemon', 'Run in background', false)
   .action(async (service, options) => {
     const validServices = ['collector', 'dashboard'];
@@ -52,7 +52,7 @@ program
 
     if (options.daemon) {
       if (fs.existsSync(pidFile)) {
-        console.log(chalk.red(`TokenTalos ${service || ''} is already running (PID file exists).`));
+        console.log(chalk.red(`Token Talos ${service || ''} is already running (PID file exists).`));
         process.exit(1);
       }
 
@@ -70,7 +70,7 @@ program
 
       fs.writeFileSync(pidFile, child.pid.toString());
       child.unref();
-      console.log(chalk.green(`TokenTalos ${service || 'services'} started in background (PID: ${child.pid})`));
+      console.log(chalk.green(`Token Talos ${service || 'services'} started in background (PID: ${child.pid})`));
       console.log(chalk.gray(`Logs: ${logFile}`));
       process.exit(0);
     } else {
@@ -80,7 +80,7 @@ program
 
 program
   .command('stop [service]')
-  .description('Stop TokenTalos services (all, collector, or dashboard)')
+  .description('Stop Token Talos services (all, collector, or dashboard)')
   .action(async (service) => {
     const config = await loadConfig();
     const pidFile = getPidFile(service);
@@ -96,10 +96,10 @@ program
       try {
         process.kill(parseInt(pid), 'SIGTERM');
         fs.removeSync(pidFile);
-        console.log(chalk.green(`TokenTalos ${service || ''} (PID: ${pid}) stopped.`));
+        console.log(chalk.green(`Token Talos ${service || ''} (PID: ${pid}) stopped.`));
         stopped = true;
       } catch (err) {
-        console.log(chalk.red(`Failed to stop TokenTalos ${service || ''} via PID: ${err.message}`));
+        console.log(chalk.red(`Failed to stop Token Talos ${service || ''} via PID: ${err.message}`));
         fs.removeSync(pidFile);
       }
     }
@@ -126,13 +126,13 @@ program
     }
 
     if (!stopped) {
-      console.log(chalk.yellow(`No running TokenTalos ${service || 'service'} found.`));
+      console.log(chalk.yellow(`No running Token Talos ${service || 'service'} found.`));
     }
   });
 
 program
   .command('dashboard')
-  .description('Launch the TokenTalos Dashboard (Reader Mode)')
+  .description('Launch the Token Talos Dashboard (Reader Mode)')
   .action(async () => {
     let config = await loadConfig();
     if (!config) {
@@ -159,7 +159,7 @@ program
       table.push(['Total Requests', data.total_requests]);
       console.log(table.toString());
     } catch (err) {
-      console.error(chalk.red('Error: Could not connect to API. Is TokenTalos running?'));
+      console.error(chalk.red('Error: Could not connect to API. Is Token Talos running?'));
     }
   });
 

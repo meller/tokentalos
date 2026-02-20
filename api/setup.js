@@ -34,7 +34,7 @@ export async function runSetup() {
     return defaults;
   }
 
-  console.log(chalk.blue.bold('\n--- TokenTalos Setup ---\n'));
+  console.log(chalk.blue.bold('\n--- Token Talos Setup ---\n'));
   console.log(chalk.gray('This wizard will configure your Database, Collector (API), and Dashboard.'));
   console.log(chalk.white('\n  [Collector]: ') + chalk.gray('The ingestion endpoint that receives and analyzes LLM data.'));
   console.log(chalk.white('  [Dashboard]: ') + chalk.gray('The visual interface for monitoring your AI performance.\n'));
