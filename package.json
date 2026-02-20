@@ -1,6 +1,6 @@
 {
   "name": "@meller/tokentalos",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Token Talos: The ORM for LLMs. A standalone gateway and library for cost-optimized, secure, and tracked prompt orchestration.",
   "type": "module",
   "publishConfig": {
