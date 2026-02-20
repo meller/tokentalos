@@ -1,6 +1,7 @@
 # TokenTalos Tech Stack
 
 ## Backend
+- **Distribution:** Public npm registry (`@meller/tokentalos`).
 - **Engine:** Standalone host-agnostic logic layer (`lib/engine`).
 - **Framework:** Express.js (Node.js)
 - **Database:** SQLite (Default) / PostgreSQL
