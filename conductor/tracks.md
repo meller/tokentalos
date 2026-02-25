@@ -18,3 +18,6 @@
 
 - [x] **Track: Rename project to Token Talos, refactor all code symbols, and transition to GitHub Package distribution.**
   *Link: [./tracks/tokentalos_rebrand_20260219/](./tracks/tokentalos_rebrand_20260219/)*
+
+- [ ] **Track: Multi-Language SDK Development (PHP & Python)**
+  *Link: [./tracks/sdk_development_20260221/](./tracks/sdk_development_20260221/)*
