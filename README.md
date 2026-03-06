@@ -80,8 +80,111 @@ const tt = new TokenTalos({
 });
 ```
 
+### 🐳 Sidecar Mode (Non-Node.js Backends)
+Ideal for **Python, Go, PHP, or any non-Node.js backend** running in Docker or a managed cloud container (e.g., Cloud Run, Fly.io, Railway). Instead of deploying a separate TokenTalos service, you bundle it as a co-process that starts alongside your main app.
+
+**How it works:**
+- TokenTalos Express API runs on `localhost:8060` inside the same container
+- Your backend calls it via standard HTTP — no special SDK needed
+- Config is driven entirely by environment variables (no interactive wizard)
+
+**Step 1 — Create a sidecar entry point** (`tokentalos-sidecar.mjs`):
+
+```js
+import { startServer } from '/app/tokentalos/api/index.js';
+import fs from 'fs';
+
+fs.mkdirSync('/tmp/tokentalos', { recursive: true });
+
+await startServer({
+  databaseType: 'sqlite',
+  sqlitePath: '/tmp/tokentalos/data.db',
+  enableCollector: true,
+  enableDashboard: false,
+  gatewayPort: parseInt(process.env.TOKENTALOS_PORT || '8060'),
+
+  llmProvider: 'gemini',
+  defaultModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+
+  // ADC (Vertex AI) when running in Cloud Run; API key for local/other environments
+  geminiAuthType: process.env.GEMINI_API_KEY ? 'apikey' : 'adc',
+  geminiApiKey: process.env.GEMINI_API_KEY,
+  gcpProjectId: process.env.GCP_PROJECT || 'my-gcp-project',
+
+  formattingFeatures: ['compress'],
+  securityFeatures: [],
+  intelligenceFeatures: ['cache'],
+  maxTokens: 16000,
+});
+```
+
+**Step 2 — Add to your Dockerfile:**
+
+```dockerfile
+# Install Node.js alongside your runtime (example: Python)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Copy TokenTalos source and install prod deps
+COPY tokentalos/ /app/tokentalos/
+COPY tokentalos-sidecar.mjs /app/
+RUN cd /app/tokentalos && npm ci --omit=dev
+
+# Use an entrypoint script instead of CMD
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+```
+
+**Step 3 — Create `docker-entrypoint.sh`:**
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+# Start TokenTalos sidecar in background
+node /app/tokentalos-sidecar.mjs &
+
+# Give it a moment to initialize SQLite + bind port
+sleep 2
+
+# Start your main app as PID 1 (receives container signals)
+exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+```
+
+**Step 4 — Call from your backend (Python example):**
+
+```python
+import httpx
+
+response = await httpx.AsyncClient().post(
+    "http://localhost:8060/api/v1/usage/execute",
+    json={
+        "projectId": "my-project",
+        "provider": "gemini",
+        "model": "gemini-2.0-flash",
+        "parts": {
+            "system": "You are a helpful assistant.",
+            "user_query": "Summarize today's market conditions."
+        }
+    }
+)
+result = response.json()
+print(result["content"])
+```
+
+**Environment variables for the sidecar:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `TOKENTALOS_PORT` | `8060` | Port the sidecar binds to |
+| `GEMINI_API_KEY` | — | Gemini API key (omit to use ADC/Vertex AI) |
+| `GCP_PROJECT` | — | GCP project ID (required for ADC) |
+| `GCP_LOCATION` | `global` | Vertex AI region |
+| `GEMINI_MODEL` | `gemini-2.0-flash` | Default LLM model |
+
+> **Tip for Cloud Run / GCP:** Omit `GEMINI_API_KEY` entirely. TokenTalos will use Application Default Credentials (ADC) via the container's service account — no secrets needed.
+
 ### 🌍 Cross-Language Support
-TokenTalos is designed as a language-agnostic Gateway. You can use standard HTTP clients in any language (PHP, Python, Go, etc.) to communicate with the TokenTalos Proxy.
+TokenTalos is designed as a language-agnostic Gateway. You can use standard HTTP clients in any language (PHP, Python, Go, etc.) to communicate with the TokenTalos Proxy or Sidecar.
 
 Check out the [examples/](./examples) directory for a **PHP cURL** example.
 

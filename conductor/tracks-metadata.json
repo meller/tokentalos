@@ -1,0 +1,71 @@
+{
+  "001": {
+    "folder_path": "conductor/tracks/001-tokentalos-extraction",
+    "title": "TokenTalos Extraction and Unification",
+    "lane": "backlog",
+    "imported_from": "tokentalos_extraction_20260218"
+  },
+  "002": {
+    "folder_path": "conductor/tracks/002-tokentalos-rebrand",
+    "title": "Project Rebranding - Token Wall to Token Talos",
+    "lane": "backlog",
+    "imported_from": "tokentalos_rebrand_20260219"
+  },
+  "003": {
+    "folder_path": "conductor/tracks/003-gateway-advanced",
+    "title": "Gateway Advanced Features",
+    "lane": "backlog",
+    "imported_from": "tokentalos_gateway_advanced_20260218"
+  },
+  "004": {
+    "folder_path": "conductor/tracks/004-multiproject-analytics",
+    "title": "Multi-Project Analytics",
+    "lane": "backlog",
+    "imported_from": "tokentalos_multiproject_analytics_20260218"
+  },
+  "005": {
+    "folder_path": "conductor/tracks/005-security-governance",
+    "title": "Security & Governance",
+    "lane": "backlog",
+    "imported_from": "tokentalos_security_governance_20260219"
+  },
+  "006": {
+    "folder_path": "conductor/tracks/006-sdk-development",
+    "title": "Multi-Language SDK Development (PHP & Python)",
+    "lane": "done",
+    "imported_from": "sdk_development_20260221"
+  },
+  "tracks": {
+    "001": {
+      "folder_path": "conductor/tracks/001-tokentalos-extraction",
+      "last_file_update": "2026-03-04T23:30:03.120Z",
+      "synced": true
+    },
+    "003": {
+      "folder_path": "conductor/tracks/003-gateway-advanced",
+      "last_file_update": "2026-03-04T23:29:37.873Z",
+      "synced": true
+    },
+    "002": {
+      "folder_path": "conductor/tracks/002-tokentalos-rebrand",
+      "last_file_update": "2026-03-04T23:29:57.190Z",
+      "synced": true
+    },
+    "005": {
+      "folder_path": "conductor/tracks/005-security-governance",
+      "last_file_update": "2026-03-04T23:29:37.875Z",
+      "synced": true
+    },
+    "006": {
+      "folder_path": "conductor/tracks/006-sdk-development",
+      "last_file_update": "2026-03-04T23:29:37.881Z",
+      "synced": true
+    },
+    "004": {
+      "folder_path": "conductor/tracks/004-multiproject-analytics",
+      "last_file_update": "2026-03-04T23:29:37.882Z",
+      "synced": true
+    }
+  },
+  "last_checked": "2026-03-04T23:30:03.120Z"
+}

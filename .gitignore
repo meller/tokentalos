@@ -37,3 +37,7 @@ yarn-error.log*
 *.db
 *.sqlite
 data/
+
+# LaneConductor
+.laneconductor.json
+.env

@@ -62,5 +62,8 @@
   "optionalDependencies": {
     "sqlite": "^5.0.1",
     "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "chokidar": "^5.0.0"
   }
 }
