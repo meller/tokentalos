@@ -199,7 +199,11 @@ router.post('/prompt/construct', authMiddleware, async (req, res) => {
   const { provider, model, parts, endpoint, projectId } = req.body;
   const orgId = req.orgId;
 
-  const { processedParts, metadata } = await processPromptParts(parts, config);
+  const { processedParts, metadata, criticalThreatFound } = await processPromptParts(parts, config);
+
+  if (criticalThreatFound && config.securityAction === 'reject') {
+    return res.status(400).json({ error: 'Security threat detected in prompt parts. Construction rejected by policy.' });
+  }
 
   const finalProvider = provider || config.llmProvider || 'gemini';
   const finalModel = model || config.defaultModel || 'gemini-3-flash-preview';

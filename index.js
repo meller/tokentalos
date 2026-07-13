@@ -129,6 +129,21 @@ export class TokenTalos {
   }
 
   /**
+   * Execute a streaming prompt through the Gateway
+   */
+  async *streamExecute(params) {
+    if (this.mode === 'standalone') {
+      yield* this.engine.streamExecute({
+        projectId: this.projectId,
+        ...params
+      });
+    } else {
+      // Proxy streaming would need SSE support, but we'll mark it as TODO
+      throw new Error('Streaming not yet implemented in proxy mode');
+    }
+  }
+
+  /**
    * Verify reasoning chunks (OPV)
    */
   async verifyReasoning(params) {
