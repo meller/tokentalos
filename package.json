@@ -44,9 +44,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.76.0",
-    "@google-cloud/vertexai": "^1.10.0",
     "@google/genai": "^2.12.0",
-    "@google/generative-ai": "^0.24.1",
     "axios": "^1.6.0",
     "chalk": "^5.0.0",
     "cli-table3": "^0.6.3",
@@ -54,6 +52,7 @@
     "cors": "^2.8.5",
     "express": "^5.0.0",
     "fs-extra": "^11.1.1",
+    "google-auth-library": "^10.9.0",
     "inquirer": "^9.0.0",
     "js-tiktoken": "^1.0.7",
     "openai": "^6.22.0",
