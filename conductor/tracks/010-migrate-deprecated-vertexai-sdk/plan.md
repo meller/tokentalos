@@ -145,15 +145,29 @@ exist), Import Check, CLI Smoke Test. Track-specific checks (`test.md`): `test-v
 and `test-stream-reporting.js` both re-run clean post-Phase-4. `npm ls @google-cloud/vertexai
 @google/generative-ai` confirmed empty. Secrets scan: no hardcoded credentials.
 
-## Phase 6: Publish + update coachai's dependency — not yet done (pending user decision)
+## Phase 6: Publish + update coachai's dependency — ✅ DONE 2026-07-19
 
-- [ ] Bump version (patch or minor per this repo's own convention).
-- [x] Confirm `LLMGateway`/`TokenTalos`'s public API surface is unchanged (REQ-7) — confirmed in
-      review.
-- [ ] `npm publish` — Phases 1-5b are all done and quality-gated. **Holding off on the actual
-      `npm publish` and coachai dependency switch pending explicit user go-ahead** — this is a
-      real, externally-visible action (and this repo's `publishConfig` targets the public npm
-      registry), not something to do unilaterally as part of routine track completion.
-- [ ] In coachai: update `package.json`'s `@meller/tokentalos` version range, `npm install`,
-      confirm the *published* (not linked) package resolves, remove the `npm link`.
+- [x] Bumped version `1.1.0` → `1.2.0` (minor — Track 011 added a backward-compatible feature,
+      Track 010 removed deprecated deps internally with no public API change).
+- [x] Confirmed `LLMGateway`/`TokenTalos`'s public API surface is unchanged (REQ-7) — confirmed
+      in review.
+- [x] `npm publish` — done with the user's explicit go-ahead (they authenticated/2FA'd it
+      themselves). Confirmed live: `npm view @meller/tokentalos dist-tags` → `{ latest: '1.2.0' }`.
+- [x] In coachai: `npm uninstall @meller/tokentalos && npm install @meller/tokentalos@^1.2.0` —
+      `node_modules/@meller/tokentalos` is now a real installed package, not a symlink
+      (confirmed via `readlink -f`); `package.json` now declares `^1.2.0`.
+- [x] Restarted coachai's backend, re-ran the same real-prompt reproduction against the actual
+      published package (not the link): no deprecation warning, correct
+      `"Initializing GoogleGenAI (Vertex mode)"` log line, streaming worked (4 chunks), and a new
+      `chat_stream` `usage_data` row was recorded (`latency_ms: 9023`, `input_tokens: 1515`,
+      `output_tokens: 66`) — consistent with the Phase 5b variance finding, confirming the
+      published package behaves identically to what was tested via the symlink.
+- [x] Removed the local `npm link` from coachai's side (via `npm uninstall`/`npm install`).
+      This repo's own `npm link` global registration could not be removed
+      (`npm unlink -g @meller/tokentalos` failed: permission denied on
+      `/usr/lib/node_modules`, would need `sudo`) — left in place since it's harmless now that
+      coachai no longer references it.
+- [x] Update `index.md` Progress/Phase/Summary — done, see below.
+
+**Track 010 is now fully complete.**
 - [ ] Update `index.md` Progress/Phase/Summary as phases complete.
