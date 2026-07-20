@@ -2,6 +2,14 @@
 
 ## Track Creation Requests
 
+### Track 014: Configurable Gemini thinking level (default MINIMAL)
+**Status**: processed
+**Type**: track-create
+**Created**: 2026-07-20T00:00:00.000Z
+**Title**: Configurable Gemini thinking level (default MINIMAL)
+**Description**: Real measurement from coachai: gemini-3.5-flash defaults to thinking_level medium, consuming hundreds-thousands of tokens per call. On a real representative prompt (app's actual call shape, no max_tokens cap): default averaged ~27s across trials; thinkingLevel MINIMAL averaged ~12s (45-70% faster every trial), with no observed quality loss (comparable output length, correct term+mechanism usage, 100% marker compliance across all trials). thinkingBudget (token-count control) was tried first and found unreliable for this model. Adds config.llmThinkingLevel (engine-level) + options.thinkingLevel (per-call override), defaulting to 'MINIMAL' package-wide when unset — a deliberate behavior change from today's silent medium default, with explicit null as the opt-out.
+**Metadata**: { "priority": "high", "assignee": null }
+
 ### Track 013: Fail fast on transient LLM errors + support caller-driven cancellation
 **Status**: processed
 **Type**: track-create
