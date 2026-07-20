@@ -1,0 +1,8 @@
+# Track 013: Fail fast on transient LLM errors + support caller-driven cancellation
+
+**Lane**: done
+**Lane Status**: success
+**Progress**: 100%
+**Phase**: Implemented, reviewed (PASS), quality-gated (PASS) — see `conversation.md`. `getVertex()`/`getGemini()` now bound each attempt to a 30s timeout with 2 max attempts (configurable), instead of `@google/genai`'s defaults (5 attempts, 1-hour backoff ceiling, no per-attempt timeout) that let a real transient 503 hang for 10 minutes. `abortSignal` threaded through every layer so a caller can cancel an in-flight call — verified against the real scenario that matters (abort mid-flight: `AbortError` thrown ~3s after abort, not after natural completion). One real `@google/genai` SDK limitation found and documented (pre-aborted signals aren't honored), doesn't block the fix.
+**Type**: dev
+**Summary**: Root-caused (coachai Track 135) a real ~10-minute hang: a transient Vertex 503 ("The service is currently unavailable") with `@google/genai`'s defaults — up to 5 attempts, backoff ceiling `maxElapsedTime: 3600000` (1 hour!), and no `httpOptions.timeout` set anywhere in `getVertex()` — meant a single stuck attempt could hang indefinitely before the SDK gave up. Fix: set a bounded `httpOptions.timeout` + `retryOptions.attempts` on the cached Vertex client (configurable via `config.llmRequestTimeoutMs`/`config.llmMaxRetryAttempts`, sensible defaults), and thread an optional per-call `abortSignal` (a real, documented `GenerateContentConfig` field) through `execute()`/`streamExecute()` at every layer so a caller like coachai can cancel an in-flight call the instant its own client disconnects, instead of leaving it running server-side burning real API time for a response nobody's waiting for.

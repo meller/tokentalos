@@ -2,6 +2,14 @@
 
 ## Track Creation Requests
 
+### Track 013: Fail fast on transient LLM errors + support caller-driven cancellation
+**Status**: processed
+**Type**: track-create
+**Created**: 2026-07-20T00:00:00.000Z
+**Title**: Fail fast on transient LLM errors + support caller-driven cancellation
+**Description**: Root-caused (coachai Track 135) a real 10-minute hang from a transient Vertex 503 — @google/genai defaults to 5 retry attempts with a 1-hour maxElapsedTime backoff ceiling, and no httpOptions.timeout is set anywhere in getVertex(), so a stuck attempt can hang indefinitely. Fix: set a bounded httpOptions.timeout + retryOptions.attempts on the cached Vertex/Gemini clients (configurable, sensible defaults), and thread an optional per-call abortSignal (a real documented GenerateContentConfig field) through execute()/streamExecute() at every layer so a caller can cancel an in-flight call on its own client disconnect.
+**Metadata**: { "priority": "high", "assignee": null }
+
 ### Track 012: Structured (pino) logging for the engine layer
 **Status**: processed
 **Type**: track-create
