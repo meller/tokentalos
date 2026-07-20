@@ -1,6 +1,7 @@
 import { TokenTalosEngine } from './lib/engine/index.js';
 import { TokenTalosPrompt } from './lib/engine/parameterizer.js';
 import axios from 'axios';
+import { getLogger } from './lib/logger.js';
 
 /**
  * TokenTalos Client SDK
@@ -20,7 +21,8 @@ export class TokenTalos {
     this.reportUrl = options.reportUrl || options.apiUrl || null; // URL to report usage to if in standalone
     this.projectId = options.projectId || 'default';
     this.apiKey = options.apiKey || null;
-    
+    this.logger = options.config?.logger || getLogger();
+
     if (this.mode === 'standalone') {
       this.engine = new TokenTalosEngine({ 
         ...options.config, 
@@ -57,7 +59,7 @@ export class TokenTalos {
         headers: this._getHeaders() 
       });
     } catch (err) {
-      console.warn('[TokenTalos] Failed to report usage to collector:', err.message);
+      this.logger.warn({ err }, '[TokenTalos] Failed to report usage to collector');
     }
   }
 

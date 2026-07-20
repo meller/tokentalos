@@ -2,6 +2,14 @@
 
 ## Track Creation Requests
 
+### Track 012: Structured (pino) logging for the engine layer
+**Status**: processed
+**Type**: track-create
+**Created**: 2026-07-19T00:00:00.000Z
+**Title**: Structured (pino) logging for the engine layer
+**Description**: Discovered while investigating Track 011's persist-failure catch block — a real ~76s call completed successfully but left no usage_data row, and the console.warn meant to surface that had nowhere durable to go (consumers piping stdout into pinorama-style viewers silently drop plain-text lines). tokentalos has zero pino dependency; all 17 diagnostic call sites in lib/engine/*.js and index.js are plain console.log/warn/error. Fix: add pino, a small shared logger (lib/logger.js), let TokenTalosEngine/LLMGateway/TokenTalos accept an optional config.logger override, convert all 17 call sites. bin/tokentalos.js (CLI UX) and api/*.js (separate dashboard server) explicitly out of scope.
+**Metadata**: { "priority": "medium", "assignee": null }
+
 ### Track 011: streamExecute() doesn't report usage (no DB trail for streaming calls)
 **Status**: processed
 **Type**: track-create
