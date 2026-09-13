@@ -41,3 +41,10 @@ data/
 # LaneConductor
 .laneconductor.json
 .env
+conductor/tracks/**/conversation.md
+conductor/tracks/**/conversation.json
+.conv-cursor
+.worktrees/
+conductor/.runs/
+conductor/tracks/**/.prespawn-block-count
+conductor/tracks/**/.prespawn-block-kind
