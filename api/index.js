@@ -46,7 +46,7 @@ export function createApp(app, config) {
   app.set('tokentalosConfig', config);
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
 
   // --- API Router ---
   // The Dashboard ALWAYS needs the Analytics and Recent Usage APIs to function.

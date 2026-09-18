@@ -24,4 +24,20 @@ describe('PII Detection Logic', () => {
     const results = detectPII(text);
     expect(results).toEqual([]);
   });
+
+  test('should not exhibit catastrophic backtracking on a long non-matching run (TD-015)', () => {
+    const text = 'x'.repeat(100000); // no '@' anywhere
+    const start = Date.now();
+    const results = detectPII(text);
+    expect(Date.now() - start).toBeLessThan(200);
+    expect(results).toEqual([]);
+  });
+
+  test('should still detect an email embedded in a long run (TD-015)', () => {
+    const text = 'x'.repeat(50000) + ' a@b.com ' + 'x'.repeat(50000);
+    const start = Date.now();
+    const results = detectPII(text);
+    expect(Date.now() - start).toBeLessThan(200);
+    expect(results).toContainEqual(expect.objectContaining({ type: 'email', value: 'a@b.com' }));
+  });
 });
